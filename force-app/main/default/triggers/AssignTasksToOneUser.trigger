@@ -16,6 +16,7 @@ trigger AssignTasksToOneUser on Account (after update) {
             }
         }
     }
-    
-    update tasksForUpdate;
+    if (tasksForUpdate != null){
+        update tasksForUpdate;
+    }
 }
