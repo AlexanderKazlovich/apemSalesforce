@@ -1,4 +1,4 @@
-public class CreateTask {
+public with sharing class CreateTask {
     @InvocableMethod
     public static void create(List<Account> accounts){
         if(accounts != null){
@@ -9,7 +9,7 @@ public class CreateTask {
                 newTask.Subject = 'Negotiations with '+ acc.Name;
                 newTasks.add(newTask);
             }
-            insert newTasks;
+                insert newTasks;
         }
     }
 }
