@@ -8,47 +8,56 @@ public with sharing class AccountTriggerHelper {
         this.newList = newList;
     }
 
-    public Set<Id> returnChangedAccounts(){
-        Set<Id> setWithChangedAccounts = new Set<Id>();
-
-        for(Account accOld : oldList){
-            for (Account accNew : newList) {
-                if (accNew.Id == accOld.Id && ( accNew.BillingCity != accOld.BillingCity || 
-                                                accNew.BillingCountry != accOld.BillingCountry ||
-                                                accNew.BillingState != accOld.BillingState ||
-                                                accNew.BillingPostalCode != accOld.BillingPostalCode ||
-                                                accNew.BillingLatitude != accOld.BillingLatitude ||
-                                                accNew.BillingLongitude != accOld.BillingLongitude ||
-                                                accNew.BillingGeocodeAccuracy != accOld.BillingGeocodeAccuracy ||
-                                                accNew.BillingStreet != accOld.BillingStreet)) {
-                    setWithChangedAccounts.add(accNew.Id);
-                }
-            }
+    public List<Id> getIdsFromTriggerNew(){
+        List<Id> listId = new List<Id>();
+        for(Account account : newList){
+            listId.add(account.Id);
         }
-        System.debug('Old list size = ' + oldList.size() + 'New list size = ' + newList.size());
+        return listId;
+    }
 
-        return setWithChangedAccounts;
+    public Set<Id> returnChangedAccounts(){
+        Set<Id> changedAccounts = new Set<Id>();
+        Map<Id, Account> oldRecords = new Map<Id, Account>(oldList); 
+        for(Account newAccount : newList){
+            Account oldAccount = oldRecords.get(newAccount.Id);
+                if (newAccount.BillingCity != oldAccount.BillingCity || 
+                    newAccount.BillingCountry != oldAccount.BillingCountry ||
+                    newAccount.BillingState != oldAccount.BillingState ||
+                    newAccount.BillingPostalCode != oldAccount.BillingPostalCode ||
+                    newAccount.BillingLatitude != oldAccount.BillingLatitude ||
+                    newAccount.BillingLongitude != oldAccount.BillingLongitude ||
+                    newAccount.BillingGeocodeAccuracy != oldAccount.BillingGeocodeAccuracy ||
+                    newAccount.BillingStreet != oldAccount.BillingStreet) 
+                {
+                    changedAccounts.add(newAccount.Id);
+                }
+            
+        }
+
+        return changedAccounts;
     }
 
     public void assignTasks(){
         Set<Id> ids = new Set<Id>();
-        for(Account acc : newList){
-            ids.add(acc.Id);
+        for(Account account : newList){
+            ids.add(account.Id);
         }
 
-        List<Account> listOfAccounts = [select id,(select ownerId, whatId from Tasks) from Account where id in : ids];        
+        List<Account> listOfAccounts = [SELECT id,(SELECT OwnerId, WhatId FROM Tasks) FROM Account WHERE id IN : ids];        
         List<Task> tasksForUpdate = new List<Task>();
 
-        for(Account acc : listOfAccounts){
-            if(acc.Tasks.size() > 3){
-                for(Task t : acc.Tasks){
-                    if(t.whatId == acc.Id){
-                        t.OwnerId = '0055g00000Bn4IIAAZ';
-                        tasksForUpdate.add(t);
+        for(Account account : listOfAccounts){
+            if(account.Tasks.size() > 3){
+                for(Task task : account.Tasks){
+                    if(task.whatId == account.Id){
+                        task.OwnerId = '0055g00000Bn4IIAAZ';
+                        tasksForUpdate.add(task);
                     }
                 }
             }
         }
+
             update tasksForUpdate;
     }
 }

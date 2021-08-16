@@ -1,56 +1,74 @@
 public with sharing class AccountTriggerHandler {
 
-    AccountTriggerHelper helper = new AccountTriggerHelper(Trigger.new, Trigger.old);
+    private static boolean isFirstRun = true;
+    
+    AccountTriggerHelper helper = new AccountTriggerHelper(Trigger.old, Trigger.new);
 
     public void onBeforeInsert(){
-        //not implemented yet
-    }
-    public void onAfterInsert(List<Account> newAccounts){
-        List<Id> listId = new List<Id>();
-        for(Account acc : newAccounts){
-            listId.add(acc.Id);
+        if (isFirstRun) {
+            isFirstRun = false;
+            //not implemented yet
         }
-        CreateTask.createSyncTask(listId);
+    }
+    public void onAfterInsert(){
+        if (true) {
+            isFirstRun = false;
+            TaskCreator.createSyncTask(helper.getIdsFromTriggerNew());           
+        }
     }
     public void onBeforeUpdate(){
-        //not implemented yet
+        if(isFirstRun){
+            isFirstRun = false;
+            //not implemented yet
+        }
     }
     public void onAfterUpdate(){
-        if (!System.isBatch()) {
-            SynckedFieldsUtil util = new SynckedFieldsUtil(helper);
-            System.enqueueJob(util);
-            setSynckedFields(helper.returnChangedAccounts());
+        if (true) {
+            isFirstRun = false;
+                if (!System.isBatch()) {
+                SynckedFieldsUtil util = new SynckedFieldsUtil(helper);
+                System.enqueueJob(util);
+                setSynckedFields(helper.returnChangedAccounts());
+                }
+
+            helper.assignTasks(); 
         }
-
-
-        helper.assignTasks();
     }
     public void onBeforeDelete(){
-        //not implemented yet
+        if(isFirstRun){
+            isFirstRun = false;
+            //not implemented yet
+        }
     }
     public void onAfterDelete(){
-        //not implemented yet
+        if(isFirstRun){
+            isFirstRun = false;
+            //not implemented yet
+        }
     }
     public void onUndelete(){
-        
+        if(isFirstRun){
+            isFirstRun = false;
+            //not implemented yet
+        }
     }
     @Future
     public static void setSynckedFields(Set<Id> accountIds){
         if (accountIds != null) {
-            List<Account> listOfAccount = [select Id, 
-            (Select Id, Is_Synced__c, Processed_By_Future__c from Contacts) 
-            from Account where Id In :accountIds];
+            List<Account> listOfAccount = [SELECT Id, 
+            (SELECT Id, Is_Synced__c, Processed_By_Future__c FROM Contacts) 
+            FROM Account WHERE Id IN :accountIds];
     
             List<Contact> contactsForUpdate = new List<Contact>();
 
-            for(Account acc : listOfAccount){
-                for(Contact con : acc.Contacts){
-                    con.Is_Synced__c = false;
-                    con.Processed_By_Future__c = true;
-                    contactsForUpdate.add(con);
+            for(Account account : listOfAccount){
+                for(Contact contact : account.Contacts){
+                    contact.Is_Synced__c = false;
+                    contact.Processed_By_Future__c = true;
+                    contactsForUpdate.add(contact);
                 }
             }
-            System.debug(contactsForUpdate);
+
             update contactsForUpdate;
         }
     }

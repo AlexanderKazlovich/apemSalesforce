@@ -1,20 +1,22 @@
 public with sharing class UpdateTasks implements Database.Batchable<SObject> {
 
     public Database.QueryLocator start(Database.BatchableContext bc){
-        return Database.getQueryLocator('select Id, Name, Updated_By_Task__c, (Select Account.Owner.Name, Account_Owner__c, Is_Synced__c from Tasks where Is_Synced__c = false) from Account');
+        return Database.getQueryLocator('SELECT Id, Name, Updated_By_Task__c, (SELECT Account.Owner.Name, Account_Owner__c, Is_Synced__c FROM Tasks WHERE Is_Synced__c = false) FROM Account');
     }
 
     public void execute(Database.BatchableContext bc, List<Account> scope){  
-   
+    
         List<Task> tasksForUpdate = new List<Task>();
-        for(Account acc : scope){
-            if (acc.Tasks.size() != 0) {
-                for(Task t : acc.Tasks){
-                    t.Account_Owner__c = t.Account.Owner.Name;
-                    t.Is_Synced__c = true;
-                    tasksForUpdate.add(t);
+        for(Account account : scope){
+            if (account.Tasks.size() != 0) {
+                for(Task task : account.Tasks){
+                    task.Account_Owner__c = task.Account.Owner.Name;
+                    task.Is_Synced__c = true;
+                    tasksForUpdate.add(task);
+
+                    
                 }
-                acc.Updated_By_Task__c = true;
+                account.Updated_By_Task__c = true;
             }
         }
 

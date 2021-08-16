@@ -4,8 +4,7 @@ global class MultiSelectFlowVales{
         if(!values.isEmpty()){
             String value = values[0];
             List<String> splitValue= value.split('; ');
-            List<Product2> listOfProducts = [select Id, isActive from Product2 where Id IN :splitValue];
-            
+            List<Product2> listOfProducts = [SELECT Id, isActive FROM Product2 where Id IN :splitValue];
             Result result = new Result();
             result.products = listOfProducts;
             List<Result> listResult = new List<Result>();

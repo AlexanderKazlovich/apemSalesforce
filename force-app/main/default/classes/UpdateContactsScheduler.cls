@@ -4,4 +4,3 @@ public with sharing class UpdateContactsScheduler implements Schedulable {
         Database.executeBatch(new UpdateContacts());
     }
 }
-

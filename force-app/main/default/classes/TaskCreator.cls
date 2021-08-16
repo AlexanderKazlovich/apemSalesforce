@@ -1,18 +1,18 @@
-public with sharing class CreateTask {
+public with sharing class TaskCreator {
     @Future
     public static void createSyncTask(List<Id> accountIds){
         System.debug(accountIds);
         if(accountIds != null){
             List<Task> newTasks = new List<Task>();
-            for(Account acc: [select Id, Name from Account where Id In :accountIds]){
-                System.debug(acc);
+            for(Account account: [SELECT Id, Name FROM Account WHERE Id IN :accountIds]){
+                System.debug(account);
             	Task newTask = new Task();
-            	newTask.WhatId = acc.Id;
-                newTask.Subject = 'Negotiations with '+ acc.Name;
+            	newTask.WhatId = account.Id;
+                newTask.Subject = 'Negotiations with '+ account.Name;
                 newTask.Is_Synced__c = false;
                 newTasks.add(newTask);
             }
-            System.debug(newTasks);
+
                 insert newTasks;
         }
     }
